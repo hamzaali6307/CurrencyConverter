@@ -1,4 +1,4 @@
-package com.example.example
+package com.hamy.currencyconverter.views.model
 
 import com.google.gson.annotations.SerializedName
 import com.hamy.currencyconverter.views.model.Rates

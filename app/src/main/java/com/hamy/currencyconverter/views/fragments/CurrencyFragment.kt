@@ -9,10 +9,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.work.*
 import com.hamy.currencyconverter.R
 import com.hamy.currencyconverter.database.AppDatabase
 import com.hamy.currencyconverter.database.dao.CurrencyDao
 import com.hamy.currencyconverter.networking.utils.*
+import com.hamy.currencyconverter.networking.utils.Constants.SYNC_DATA_WORK_NAME
+import com.hamy.currencyconverter.networking.utils.Constants.TAG_SYNC_DATA
 import com.hamy.currencyconverter.networking.utils.Utils.BUNDLE_TITLE
 import com.hamy.currencyconverter.networking.utils.Utils.selectedTpe
 import com.hamy.currencyconverter.networking.viewModel.CurrencyRatesViewModel
@@ -23,15 +26,17 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_currency.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class CurrencyFragment : DialogFragment(R.layout.fragment_currency) {
     private var database: CurrencyDao? = null
 
-    lateinit var currentAdapter: CurrencyAdapter
+    private lateinit var currentAdapter: CurrencyAdapter
     private var session: DefaultPreferences? = null
 
-    lateinit var job: Job
+
+    private lateinit var job: Job
 
     private val currencyViewModel: CurrencyViewModel by viewModels()
     private val currencyRatesViewModel: CurrencyRatesViewModel by viewModels()
@@ -45,22 +50,25 @@ class CurrencyFragment : DialogFragment(R.layout.fragment_currency) {
         currencyViewModel.getCurrency()
         currencyRatesViewModel.getCurrencyRates()
 
+
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initViews()
         setRecyclerView()
+        initViews()
     }
+
+
 
     private fun setRecyclerView() {
 
         currentAdapter = CurrencyAdapter {
             showSnackBar(rv_currency, it.currencyValue)
             findNavController().navigate(R.id.action_currency_to_home, Bundle().apply {
-                putString(Utils.BUNDLE_TITLE, selectedTpe)
+                putString(BUNDLE_TITLE, selectedTpe)
                 putSerializable("model", it)
             })
         }
@@ -75,33 +83,31 @@ class CurrencyFragment : DialogFragment(R.layout.fragment_currency) {
         database = AppDatabase.getAppDataBase(requireActivity())?.routineDao()
         session = DefaultPreferences(requireContext())
         ll_pb.visible()
-        database?.getSellList().apply {
-            if (this.isNullOrEmpty()) {
-                job = lifecycleScope.launch() {
-                    selectedTpe = arguments?.getString(BUNDLE_TITLE)!!
+        job = lifecycleScope.launch {
+            if (database?.getSellList().isNullOrEmpty()) {
+                selectedTpe = arguments?.getString(BUNDLE_TITLE)!!
 
-                    currencyViewModel.currencyList.observe(requireActivity()) { response ->
-                        when (response) {
-                            is Resource.Loading -> {
-                                ll_pb.visible()
-                            }
-
-                            is Resource.Success -> {
-                                ll_pb.gone()
-                                getCurrencyRates(response)
-                            }
-                            is Resource.Error -> {
-                                ll_pb.gone()
-                                showSnackBar(rv_currency, getString(R.string.network_failure_error))
-
-                            }
-                            else -> {}
+                currencyViewModel.currencyList.observe(requireActivity()) { response ->
+                    when (response) {
+                        is Resource.Loading -> {
+                            ll_pb.visible()
                         }
+
+                        is Resource.Success -> {
+                            ll_pb.gone()
+                            getCurrencyRates(response)
+                        }
+                        is Resource.Error -> {
+                            ll_pb.gone()
+                            showSnackBar(rv_currency, getString(R.string.network_failure_error))
+
+                        }
+                        else -> {}
                     }
                 }
             } else {
                 ll_pb.gone()
-                currentAdapter.differ.submitList(this)
+                currentAdapter.differ.submitList(database?.getSellList())
             }
         }
     }
@@ -129,7 +135,6 @@ class CurrencyFragment : DialogFragment(R.layout.fragment_currency) {
                 is Resource.Error -> {
                     ll_pb.gone()
                     showSnackBar(rv_currency, getString(R.string.network_failure_error))
-
                 }
                 else -> {}
             }
