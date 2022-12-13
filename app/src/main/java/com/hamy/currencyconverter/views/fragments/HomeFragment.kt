@@ -51,7 +51,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), View.OnClickListener {
                             tv_to_currency.text = getToCurrencyCode()
 
                             ("1$ = ${defaultRate.toString()} $currencyCode").also { tv_from_curr_rate.text = it }
-                            "1 $currencyCode = ${defaultRate.toString()}".also { tv_to_curr_rate.text = it }
+                            "1$ = ${defaultRate.toString()}".also { tv_to_curr_rate.text = it }
 
 
                         }
@@ -65,7 +65,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), View.OnClickListener {
                             et_currency.setText( getFromCurrencyRate())
                             tv_from_currency.text = getFromCurrencyCode()
                             "1 ${tv_from_currency.text} = ${getFromCurrencyRate()}".also { tv_from_curr_rate.text = it }
-                            "1 $currencyCode = ${defaultRate.toString()}".also { tv_to_curr_rate.text = it }
+                            "1$ = ${defaultRate.toString()}".also { tv_to_curr_rate.text = it }
 
                         }
                     }
