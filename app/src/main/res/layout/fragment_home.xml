@@ -67,6 +67,18 @@
             tools:ignore="TouchTargetSizeCheck" />
 
     </LinearLayout>
+    <TextView
+        android:id="@+id/tv_from_curr_rate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:gravity="end"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ll_from_currency"
+        />
     <LinearLayout
         android:id="@+id/ll_to_currency"
         android:layout_margin="@dimen/_10sdp"
@@ -78,7 +90,7 @@
         android:background="@drawable/background"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ll_from_currency">
+        app:layout_constraintTop_toBottomOf="@+id/tv_from_curr_rate">
 
 
         <TextView
@@ -102,6 +114,18 @@
             android:autofillHints="no" />
 
     </LinearLayout>
+    <TextView
+        android:id="@+id/tv_to_curr_rate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:gravity="end"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ll_to_currency"
+        />
 
     <TextView
         android:id="@+id/tv_result"
@@ -111,6 +135,6 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:text="@string/_0"
-        app:layout_constraintTop_toBottomOf="@+id/ll_to_currency" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_to_curr_rate" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

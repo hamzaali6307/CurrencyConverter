@@ -11,6 +11,9 @@ import com.hamy.currencyconverter.views.model.CurrencyValue
 
 object Utils {
 
+    var BUNDLE_TITLE = "bundle"
+    var selectedTpe = "type"
+
     fun currencyList(
             response: Resource.Success<CurrencyName>,
             rates: Rates?,
@@ -190,8 +193,6 @@ object Utils {
             }
         }
     }
-
-    var BUNDLE_TITLE = ""
 
     fun View.OnClickListener.initMultipleViewsClickListener(vararg view: View) {
         for (v in view) {

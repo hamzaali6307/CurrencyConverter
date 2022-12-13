@@ -1,27 +1,35 @@
 package com.hamy.currencyconverter.views.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hamy.currencyconverter.R
 import com.hamy.currencyconverter.networking.utils.*
-import com.hamy.currencyconverter.networking.viewModel.CurrencyViewModel
 import com.hamy.currencyconverter.networking.utils.Utils.BUNDLE_TITLE
+import com.hamy.currencyconverter.networking.utils.Utils.selectedTpe
 import com.hamy.currencyconverter.networking.viewModel.CurrencyRatesViewModel
+import com.hamy.currencyconverter.networking.viewModel.CurrencyViewModel
 import com.hamy.currencyconverter.views.model.CurrencyName
 import com.hamy.presentation.views.adapter.CurrencyAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_currency.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class CurrencyFragment : Fragment(R.layout.fragment_currency) {
+class CurrencyFragment : DialogFragment(R.layout.fragment_currency) {
 
     lateinit var currentAdapter: CurrencyAdapter
+    private var session: DefaultPreferences? =  null
+
+    lateinit var job: Job
 
     private val currencyViewModel: CurrencyViewModel by viewModels()
     private val currencyRatesViewModel: CurrencyRatesViewModel by viewModels()
@@ -48,7 +56,11 @@ class CurrencyFragment : Fragment(R.layout.fragment_currency) {
     private fun setRecyclerView() {
 
         currentAdapter = CurrencyAdapter {
-            showSnackBar(rv_currency,it.currencyValue)
+            showSnackBar(rv_currency, it.currencyValue)
+            findNavController().navigate(R.id.action_currency_to_home,Bundle().apply {
+                putString(Utils.BUNDLE_TITLE,selectedTpe)
+                putSerializable("model",it)
+            })
         }
 
         rv_currency.apply {
@@ -58,32 +70,31 @@ class CurrencyFragment : Fragment(R.layout.fragment_currency) {
     }
 
     private fun initViews() {
+        session  = DefaultPreferences(requireContext())
+       job =  lifecycleScope.launch() {
+            selectedTpe = arguments?.getString(BUNDLE_TITLE)!!
 
-        currencyViewModel.currencyList.observe(requireActivity()) { response ->
-            when (response) {
-                is Resource.Loading -> {
-                    ll_pb.visible()
-                }
+            currencyViewModel.currencyList.observe(requireActivity()) { response ->
+                when (response) {
+                    is Resource.Loading -> {
+                        ll_pb.visible()
+                    }
 
-                is Resource.Success -> {
-                    ll_pb.gone()
-                    getCurrencyRates(response)
-                }
-                is Resource.Error -> {
-                    ll_pb.gone()
-                    showSnackBar(rv_currency, getString(R.string.network_failure_error))
+                    is Resource.Success -> {
+                        ll_pb.gone()
+                        getCurrencyRates(response)
+                    }
+                    is Resource.Error -> {
+                        ll_pb.gone()
+                        showSnackBar(rv_currency, getString(R.string.network_failure_error))
 
+                    }
+                    else -> {}
                 }
-                else -> {}
             }
         }
-
-
-        when (arguments?.getString(BUNDLE_TITLE)) {
-            "From" -> {}
-            "To" -> {}
-        }
     }
+
     private fun getCurrencyRates(currency: Resource.Success<CurrencyName>) { // hitting rates for currencies
         currencyRatesViewModel.currencyRatesList.observe(requireActivity()) { response ->
             when (response) {
@@ -93,7 +104,8 @@ class CurrencyFragment : Fragment(R.layout.fragment_currency) {
 
                 is Resource.Success -> {
                     ll_pb.gone()
-                    currentAdapter.differ.submitList(Utils.currencyList(currency,response.data?.rates))
+                    currentAdapter.differ.submitList(Utils.currencyList(currency,
+                        response.data?.rates))
                 }
                 is Resource.Error -> {
                     ll_pb.gone()
@@ -102,6 +114,14 @@ class CurrencyFragment : Fragment(R.layout.fragment_currency) {
                 }
                 else -> {}
             }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        job.apply {
+            if(isActive) cancel()
         }
     }
 }
