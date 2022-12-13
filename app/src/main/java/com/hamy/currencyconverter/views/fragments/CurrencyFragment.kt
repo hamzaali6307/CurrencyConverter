@@ -5,12 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hamy.currencyconverter.R
+import com.hamy.currencyconverter.database.AppDatabase
+import com.hamy.currencyconverter.database.dao.CurrencyDao
 import com.hamy.currencyconverter.networking.utils.*
 import com.hamy.currencyconverter.networking.utils.Utils.BUNDLE_TITLE
 import com.hamy.currencyconverter.networking.utils.Utils.selectedTpe
@@ -25,9 +26,10 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class CurrencyFragment : DialogFragment(R.layout.fragment_currency) {
+    private var database: CurrencyDao? = null
 
     lateinit var currentAdapter: CurrencyAdapter
-    private var session: DefaultPreferences? =  null
+    private var session: DefaultPreferences? = null
 
     lateinit var job: Job
 
@@ -57,9 +59,9 @@ class CurrencyFragment : DialogFragment(R.layout.fragment_currency) {
 
         currentAdapter = CurrencyAdapter {
             showSnackBar(rv_currency, it.currencyValue)
-            findNavController().navigate(R.id.action_currency_to_home,Bundle().apply {
-                putString(Utils.BUNDLE_TITLE,selectedTpe)
-                putSerializable("model",it)
+            findNavController().navigate(R.id.action_currency_to_home, Bundle().apply {
+                putString(Utils.BUNDLE_TITLE, selectedTpe)
+                putSerializable("model", it)
             })
         }
 
@@ -70,27 +72,36 @@ class CurrencyFragment : DialogFragment(R.layout.fragment_currency) {
     }
 
     private fun initViews() {
-        session  = DefaultPreferences(requireContext())
-       job =  lifecycleScope.launch() {
-            selectedTpe = arguments?.getString(BUNDLE_TITLE)!!
+        database = AppDatabase.getAppDataBase(requireActivity())?.routineDao()
+        session = DefaultPreferences(requireContext())
+        ll_pb.visible()
+        database?.getSellList().apply {
+            if (this.isNullOrEmpty()) {
+                job = lifecycleScope.launch() {
+                    selectedTpe = arguments?.getString(BUNDLE_TITLE)!!
 
-            currencyViewModel.currencyList.observe(requireActivity()) { response ->
-                when (response) {
-                    is Resource.Loading -> {
-                        ll_pb.visible()
-                    }
+                    currencyViewModel.currencyList.observe(requireActivity()) { response ->
+                        when (response) {
+                            is Resource.Loading -> {
+                                ll_pb.visible()
+                            }
 
-                    is Resource.Success -> {
-                        ll_pb.gone()
-                        getCurrencyRates(response)
-                    }
-                    is Resource.Error -> {
-                        ll_pb.gone()
-                        showSnackBar(rv_currency, getString(R.string.network_failure_error))
+                            is Resource.Success -> {
+                                ll_pb.gone()
+                                getCurrencyRates(response)
+                            }
+                            is Resource.Error -> {
+                                ll_pb.gone()
+                                showSnackBar(rv_currency, getString(R.string.network_failure_error))
 
+                            }
+                            else -> {}
+                        }
                     }
-                    else -> {}
                 }
+            } else {
+                ll_pb.gone()
+                currentAdapter.differ.submitList(this)
             }
         }
     }
@@ -104,8 +115,16 @@ class CurrencyFragment : DialogFragment(R.layout.fragment_currency) {
 
                 is Resource.Success -> {
                     ll_pb.gone()
-                    currentAdapter.differ.submitList(Utils.currencyList(currency,
-                        response.data?.rates))
+
+                    Utils.currencyList(
+                        currency,
+                        response.data?.rates
+                    ).apply {
+                        this.forEach {
+                            database?.insertSellList(it)
+                        }
+                        currentAdapter.differ.submitList(this)
+                    }
                 }
                 is Resource.Error -> {
                     ll_pb.gone()
@@ -121,7 +140,7 @@ class CurrencyFragment : DialogFragment(R.layout.fragment_currency) {
         super.onStop()
 
         job.apply {
-            if(isActive) cancel()
+            if (isActive) cancel()
         }
     }
 }
