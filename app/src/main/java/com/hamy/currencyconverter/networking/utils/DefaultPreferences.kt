@@ -16,7 +16,6 @@ class DefaultPreferences(context: Context) {
     companion object {
         var dataStore: DataStore<Preferences>? = null
     }
-
     init {
         dataStore = context.dataStore
     }
@@ -27,13 +26,9 @@ const val FROM_CURRENCY_RATE = "from_rate"
 const val TO_CURRENCY_RATE = "to_rate"
 const val TO_CURRENCY_CODE = "to_code"
 
-
-suspend fun getFromCurrencyCode(): String? {
-    val value = dataStore?.data?.first()?.get(stringPreferencesKey(FROM_CURRENCY_CODE))
-    if (value.isNullOrEmpty()) {
-        return value?.ifEmpty { null }
-    }
-    return value
+suspend fun getFromCurrencyCode(): String {
+    return dataStore?.data?.first()?.get(stringPreferencesKey(FROM_CURRENCY_CODE))
+        ?: return "PKR"
 }
 
 suspend fun setFromCurrencyCode(currency_code: String) {
@@ -43,12 +38,9 @@ suspend fun setFromCurrencyCode(currency_code: String) {
     }
 }
 
-suspend fun getFromCurrencyRate(): String? {
-    val value = dataStore?.data?.first()?.get(stringPreferencesKey(FROM_CURRENCY_RATE))
-    if (value.isNullOrEmpty()) {
-        return value?.ifEmpty { null }
-    }
-    return value
+suspend fun getFromCurrencyRate(): String {
+    return dataStore?.data?.first()?.get(stringPreferencesKey(FROM_CURRENCY_RATE))
+        ?: return "225"
 }
 
 suspend fun setFromCurrencyRate(currency_rate: String) {
@@ -58,12 +50,8 @@ suspend fun setFromCurrencyRate(currency_rate: String) {
     }
 }
 
-suspend fun getToCurrencyCode(): String? {
-    val value = dataStore?.data?.first()?.get(stringPreferencesKey(TO_CURRENCY_CODE))
-    if (value.isNullOrEmpty()) {
-        return value?.ifEmpty { null }
-    }
-    return value
+suspend fun getToCurrencyCode(): String {
+    return dataStore?.data?.first()?.get(stringPreferencesKey(TO_CURRENCY_CODE)) ?: return "PKR"
 }
 
 suspend fun setToCurrencyCode(currency_code: String) {
@@ -73,13 +61,9 @@ suspend fun setToCurrencyCode(currency_code: String) {
     }
 }
 
-    suspend fun getToCurrencyRate(): String? {
-        val value = dataStore?.data?.first()?.get(stringPreferencesKey(TO_CURRENCY_RATE))
-        if (value.isNullOrEmpty()) {
-            return value?.ifEmpty { null }
-        }
-        return value
-    }
+suspend fun getToCurrencyRate(): String {
+    return dataStore?.data?.first()?.get(stringPreferencesKey(TO_CURRENCY_RATE)) ?: return "225"
+}
 
     suspend fun setToCurrencyRate(currency_code: String) {
         val dataStoreKey = stringPreferencesKey(TO_CURRENCY_RATE)

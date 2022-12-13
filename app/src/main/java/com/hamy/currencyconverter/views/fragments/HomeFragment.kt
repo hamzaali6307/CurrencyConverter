@@ -1,6 +1,8 @@
 package com.hamy.currencyconverter.views.fragments
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,6 +32,28 @@ class HomeFragment : Fragment(R.layout.fragment_home), View.OnClickListener {
         super.onViewCreated(view, savedInstanceState)
 
         initViews()
+
+        et_currency.addTextChangedListener(object : TextWatcher {
+
+            override fun afterTextChanged(s: Editable) {
+                lifecycleScope.launch {
+                    if (!et_currency.text.isNullOrEmpty() && et_currency.text.toString()!= ("0") ) {
+                        tv_result.text =
+                            (((et_currency.text.toString()).toFloat() / getFromCurrencyRate().toFloat()) * getToCurrencyRate().toFloat()).toString()
+                    }else{
+                        tv_result.text = "0"
+                    }
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence, start: Int,
+                                           count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int,
+                                       before: Int, count: Int) {
+            }
+        })
     }
 
     private fun initViews() {
@@ -43,37 +67,43 @@ class HomeFragment : Fragment(R.layout.fragment_home), View.OnClickListener {
 
                 when (selectedTpe) {
                     "From" -> {
-
                         lifecycleScope.launch() {
                             tv_from_currency.text = currencyCode
+                            tv_to_currency.text = getToCurrencyCode()
 
                             setFromCurrencyCode(currencyCode)
                             setFromCurrencyRate((defaultRate.toString()))
-                            tv_to_currency.text = getToCurrencyCode()
 
-                            ("1$ = ${defaultRate.toString()} $currencyCode").also { tv_from_curr_rate.text = it }
-                           // "1$ = ${defaultRate.toString()}".also { tv_to_curr_rate.text = it }
+                            ("1$ = ${defaultRate.toString()} $currencyCode").also {
+                                tv_from_curr_rate.text = it
+                            }
+                            "1$ = ${getToCurrencyRate()} ${getToCurrencyCode()}".also {
+                                tv_to_curr_rate.text = it
+                            }
 
                         }
                     }
                     "To" -> {
                         lifecycleScope.launch() {
                             tv_to_currency.text = currencyCode
+                            tv_from_currency.text = getFromCurrencyCode()
 
                             setToCurrencyCode(currencyCode)
                             setToCurrencyRate(defaultRate.toString())
 
-                          //  et_currency.setText( getFromCurrencyRate())
-                            tv_from_currency.text = getFromCurrencyCode()
-                            "1 ${tv_from_currency.text} = ${getFromCurrencyRate()}".also { tv_from_curr_rate.text = it }
-                         //  "1$ = ${defaultRate.toString()}".also { tv_to_curr_rate.text = it }
+                            "1 $ = ${getFromCurrencyRate()} ${getFromCurrencyCode()}".also {
+                                tv_from_curr_rate.text = it
+                            }
+                            "1 $ = ${defaultRate.toString()} $currencyCode".also {
+                                tv_to_curr_rate.text = it
+                            }
 
                         }
                     }
                 }
             }
-        }
 
+        }
     }
 
     override fun onClick(v: View?) {
