@@ -19,24 +19,4 @@ class MainActivity : AppCompatActivity() {
         mWorkManager = WorkManager.getInstance(this)
 
     }
-    private fun scheduler() {
-
-        mWorkManager?.enqueueUniquePeriodicWork(
-            Constants.SYNC_DATA_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP,
-            PeriodicWorkRequest.Builder(
-                SchedulerWorker::class.java, 15, TimeUnit.MINUTES
-            )
-                .addTag(Constants.TAG_SYNC_DATA)
-                .setConstraints(
-                    Constraints.Builder()
-                        .setRequiredNetworkType(NetworkType.CONNECTED)
-                        .build()) // setting a backoff on case the work needs to retry
-                .setBackoffCriteria(
-                    BackoffPolicy.LINEAR,
-                    PeriodicWorkRequest.MIN_BACKOFF_MILLIS,
-                    TimeUnit.MILLISECONDS
-                )
-                .build()
-        )
-    }
 }
