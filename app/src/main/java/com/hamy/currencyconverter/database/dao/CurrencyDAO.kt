@@ -8,8 +8,8 @@ interface CurrencyDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertSellList(routine: CurrencyValue)
 
-    @Update
-    fun updateSell(routine: CurrencyValue)
+    @Query("UPDATE currency SET defaultRate = :rates WHERE currencyCode=:currencyCode")
+    fun updateSell(rates: String,currencyCode :String )
 
     @Delete
     fun deleteSell(routine: CurrencyValue)

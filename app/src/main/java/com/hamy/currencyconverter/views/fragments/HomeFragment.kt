@@ -5,20 +5,30 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.hamy.currencyconverter.R
 import com.hamy.currencyconverter.networking.utils.*
+import com.hamy.currencyconverter.networking.utils.Utils.currency
+import com.hamy.currencyconverter.networking.utils.Utils.currencyFrom
+import com.hamy.currencyconverter.networking.utils.Utils.currencyTo
 import com.hamy.currencyconverter.networking.utils.Utils.initMultipleViewsClickListener
 import com.hamy.currencyconverter.networking.utils.Utils.selectedTpe
+import com.hamy.currencyconverter.networking.viewModel.CurrencyConverterViewModel
 import com.hamy.currencyconverter.views.model.CurrencyValue
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class HomeFragment : Fragment(R.layout.fragment_home), View.OnClickListener {
+    private val currencyConverterViewModel : CurrencyConverterViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        currencyConverterViewModel.getCurrencyRate(if(et_currency.text.toString().isNotEmpty()) et_currency.text.toString().toDouble() else  0.0,tv_from_currency.text.toString(),tv_to_currency.text.toString())
 
         initViews()
 
@@ -26,11 +36,22 @@ class HomeFragment : Fragment(R.layout.fragment_home), View.OnClickListener {
 
             override fun afterTextChanged(s: Editable) {
                 lifecycleScope.launch {
-                    if (!et_currency.text.isNullOrEmpty() && et_currency.text.toString()!= ("0") ) {
-                        tv_result.text =
-                            (((et_currency.text.toString()).toFloat() / getFromCurrencyRate().toFloat()) * getToCurrencyRate().toFloat()).toString()
+                    if (!et_currency.text.isNullOrEmpty() && et_currency.text.toString().toInt()!= 0)  {
+                        currencyConverterViewModel.currencyList.observe(requireActivity()) { response ->
+                            when (response) { // as api in free version not convert gives error only, Manually convert rates
+                                is Resource.Error -> {
+
+                                    showSnackBar(cl_home, getString(R.string.error_from_response))
+                                    lifecycleScope.launch {
+                                        tv_converted_currency.text =
+                                            (((et_currency.text.toString()).toFloat() / getFromCurrencyRate().toFloat()) * getToCurrencyRate().toFloat()).toString()
+                                    }
+                                }
+                                else -> {}
+                            }
+                        }
                     }else{
-                        tv_result.text = "0"
+                        tv_converted_currency.text = "0"
                     }
                 }
             }
@@ -47,6 +68,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), View.OnClickListener {
 
     private fun initViews() {
         DefaultPreferences(requireActivity())
+
         initMultipleViewsClickListener(tv_to_currency, tv_from_currency)
         if (!arguments?.isEmpty!!) {
 
@@ -97,12 +119,14 @@ class HomeFragment : Fragment(R.layout.fragment_home), View.OnClickListener {
         when (v) {
             tv_from_currency -> {
                 findNavController().navigate(R.id.action_home_to_currency, Bundle().apply {
-                    putString(Utils.BUNDLE_TITLE, "From")
+                    selectedTpe = "From"
+                    putString(Utils.BUNDLE_TITLE, selectedTpe)
                 })
             }
             tv_to_currency -> {
                 findNavController().navigate(R.id.action_home_to_currency, Bundle().apply {
-                    putString(Utils.BUNDLE_TITLE, "To")
+                    selectedTpe = "To"
+                    putString(Utils.BUNDLE_TITLE, selectedTpe)
                 })
             }
         }

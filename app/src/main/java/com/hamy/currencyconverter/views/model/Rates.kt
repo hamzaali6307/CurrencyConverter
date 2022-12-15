@@ -175,5 +175,4 @@ data class Rates(
   @SerializedName("ZAR") var ZAR: Double? = null,
   @SerializedName("ZMW") var ZMW: Double? = null,
   @SerializedName("ZWL") var ZWL: Double? = null,
-
   )

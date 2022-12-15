@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
     <TextView
         android:id="@+id/tv_title"
-        style="@style/header"
+        style="@style/tv_header"
         android:layout_width="match_parent"
         android:drawablePadding="@dimen/_10sdp"
         android:layout_marginStart="@dimen/_10sdp"

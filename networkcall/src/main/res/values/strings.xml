@@ -1,5 +1,0 @@
-<resources>
-    <string name="app_name">networkCall</string>
-    <string name="internet_not_connected">Internet not connected</string>
-    <string name="network_failure_error">Network Failure Error</string>
-</resources>

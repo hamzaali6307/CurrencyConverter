@@ -10,23 +10,22 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class RetroInstance {
 
-    companion object{
+    companion object {
         private val retrofit by lazy {
-
-            val logging = HttpLoggingInterceptor()
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY)
-
-            val client = OkHttpClient.Builder()
-                .addInterceptor(logging)
-                .build()
 
             Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
-                .client(client)
+                .client(
+                    OkHttpClient.Builder()
+                        .addInterceptor(HttpLoggingInterceptor().apply {
+                            setLevel(HttpLoggingInterceptor.Level.BODY)
+                        })
+                        .build()
+                )
                 .build()
         }
-        
+
         val api: CurrencyApi by lazy {
             retrofit.create(CurrencyApi::class.java)
         }

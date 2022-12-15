@@ -46,7 +46,6 @@ class CurrencyFragment : Fragment(R.layout.fragment_currency) {
         currencyViewModel.getCurrency()
         currencyRatesViewModel.getCurrencyRates()
 
-
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
@@ -56,8 +55,6 @@ class CurrencyFragment : Fragment(R.layout.fragment_currency) {
         setRecyclerView()
         initViews()
     }
-
-
 
     private fun setRecyclerView() {
 
@@ -103,6 +100,7 @@ class CurrencyFragment : Fragment(R.layout.fragment_currency) {
                     }
                 }
             } else {
+                currencyRatesViewModel.scheduler()
                 ll_pb.gone()
                 currentAdapter.differ.submitList(database?.getSellList())
             }
