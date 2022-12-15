@@ -4,18 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.work.*
 import com.hamy.currencyconverter.R
 import com.hamy.currencyconverter.database.AppDatabase
 import com.hamy.currencyconverter.database.dao.CurrencyDao
 import com.hamy.currencyconverter.networking.utils.*
-import com.hamy.currencyconverter.networking.utils.Constants.SYNC_DATA_WORK_NAME
-import com.hamy.currencyconverter.networking.utils.Constants.TAG_SYNC_DATA
 import com.hamy.currencyconverter.networking.utils.Utils.BUNDLE_TITLE
 import com.hamy.currencyconverter.networking.utils.Utils.selectedTpe
 import com.hamy.currencyconverter.networking.viewModel.CurrencyRatesViewModel
@@ -26,10 +23,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_currency.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
-class CurrencyFragment : DialogFragment(R.layout.fragment_currency) {
+class CurrencyFragment : Fragment(R.layout.fragment_currency) {
     private var database: CurrencyDao? = null
 
     private lateinit var currentAdapter: CurrencyAdapter
@@ -82,6 +78,7 @@ class CurrencyFragment : DialogFragment(R.layout.fragment_currency) {
     private fun initViews() {
         database = AppDatabase.getAppDataBase(requireActivity())?.routineDao()
         session = DefaultPreferences(requireContext())
+
         ll_pb.visible()
         job = lifecycleScope.launch {
             if (database?.getSellList().isNullOrEmpty()) {

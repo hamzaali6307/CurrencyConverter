@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.*
 import com.hamy.currencyconverter.R
 import com.hamy.currencyconverter.networking.Repository.CurrencyRatesRepo
-import com.hamy.currencyconverter.networking.utils.Constants
 import com.hamy.currencyconverter.networking.utils.MyApplication
 import com.hamy.currencyconverter.networking.utils.Resource
 import com.hamy.currencyconverter.networking.utils.SchedulerWorker
@@ -19,6 +18,7 @@ import retrofit2.Response
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+
 
 @HiltViewModel
 class CurrencyRatesViewModel @Inject constructor(
@@ -33,11 +33,16 @@ class CurrencyRatesViewModel @Inject constructor(
 
     fun getCurrencyRates() = viewModelScope.launch {
         safeCurrencyRatesCall()
+        scheduler()
     }
 
     private fun scheduler() {
 
-        mWorkManager.enqueueUniquePeriodicWork(
+        val mywork = OneTimeWorkRequest.Builder(SchedulerWorker::class.java)
+            .setInitialDelay(5, TimeUnit.MINUTES)
+            .build()
+        WorkManager.getInstance(getApplication()).enqueue(mywork)
+       /* mWorkManager.enqueueUniquePeriodicWork(
             Constants.SYNC_DATA_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP,
             PeriodicWorkRequest.Builder(
                 SchedulerWorker::class.java, 15, TimeUnit.MINUTES
@@ -53,7 +58,7 @@ class CurrencyRatesViewModel @Inject constructor(
                     TimeUnit.MILLISECONDS
                 )
                 .build()
-        )
+        )*/
     }
 
 
