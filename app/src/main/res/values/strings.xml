@@ -9,6 +9,6 @@
     <string name="internet_not_connected">Internet not connected</string>
     <string name="network_failure_error">Some network error</string>
     <string name="loading">Loading…</string>
-    <string name="new_data_available">Rates update after 30 Mint\'s</string>
+    <string name="new_data_available">Rates update after 30 Mint\'s successfully in local storage</string>
     <string name="error_from_response">Single currency Conversion API not available with this App ID, Calculate manually in free version </string>
 </resources>
