@@ -13,9 +13,6 @@ object Utils {
 
     var BUNDLE_TITLE = "bundle"
     var selectedTpe = "type"
-    var currency = ""
-    var currencyFrom = "PKR"
-    var currencyTo = "PKR"
 
     fun currencyList(  // updating rates after 30 Mint of interval
         response: Resource.Success<CurrencyName>,

@@ -2,7 +2,6 @@ package com.hamy.currencyconverter.views.model
 
 import com.google.gson.annotations.SerializedName
 
-
 data class Rates(
 
   @SerializedName("AED") var AED: Double? = null,

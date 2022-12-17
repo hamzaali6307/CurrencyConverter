@@ -1,5 +1,6 @@
 package com.hamy.currencyconverter.views.fragments
 
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -10,9 +11,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.hamy.currencyconverter.R
 import com.hamy.currencyconverter.networking.utils.*
-import com.hamy.currencyconverter.networking.utils.Utils.currency
-import com.hamy.currencyconverter.networking.utils.Utils.currencyFrom
-import com.hamy.currencyconverter.networking.utils.Utils.currencyTo
 import com.hamy.currencyconverter.networking.utils.Utils.initMultipleViewsClickListener
 import com.hamy.currencyconverter.networking.utils.Utils.selectedTpe
 import com.hamy.currencyconverter.networking.viewModel.CurrencyConverterViewModel
@@ -23,12 +21,17 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(R.layout.fragment_home), View.OnClickListener {
-    private val currencyConverterViewModel : CurrencyConverterViewModel by viewModels()
+    private val currencyConverterViewModel: CurrencyConverterViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        currencyConverterViewModel.getCurrencyRate(if(et_currency.text.toString().isNotEmpty()) et_currency.text.toString().toDouble() else  0.0,tv_from_currency.text.toString(),tv_to_currency.text.toString())
+        currencyConverterViewModel.getCurrencyRate(
+            if (et_currency.text.toString().isNotEmpty()) et_currency.text.toString()
+                .toDouble() else 0.0,
+            tv_from_currency.text.toString(),
+            tv_to_currency.text.toString()
+        )
 
         initViews()
 
@@ -36,7 +39,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), View.OnClickListener {
 
             override fun afterTextChanged(s: Editable) {
                 lifecycleScope.launch {
-                    if (!et_currency.text.isNullOrEmpty() && et_currency.text.toString().toInt()!= 0)  {
+                    if (!et_currency.text.isNullOrEmpty() && et_currency.text.toString()
+                            .toInt() != 0
+                    ) {
                         currencyConverterViewModel.currencyList.observe(requireActivity()) { response ->
                             when (response) { // as api in free version not convert gives error only, Manually convert rates
                                 is Resource.Error -> {
@@ -50,18 +55,22 @@ class HomeFragment : Fragment(R.layout.fragment_home), View.OnClickListener {
                                 else -> {}
                             }
                         }
-                    }else{
+                    } else {
                         tv_converted_currency.text = "0"
                     }
                 }
             }
 
-            override fun beforeTextChanged(s: CharSequence, start: Int,
-                                           count: Int, after: Int) {
+            override fun beforeTextChanged(
+                s: CharSequence, start: Int,
+                count: Int, after: Int
+            ) {
             }
 
-            override fun onTextChanged(s: CharSequence, start: Int,
-                                       before: Int, count: Int) {
+            override fun onTextChanged(
+                s: CharSequence, start: Int,
+                before: Int, count: Int
+            ) {
             }
         })
     }
@@ -74,8 +83,11 @@ class HomeFragment : Fragment(R.layout.fragment_home), View.OnClickListener {
 
             selectedTpe = arguments?.getString(Utils.BUNDLE_TITLE)!!
 
-            (arguments?.getSerializable("model")!! as CurrencyValue).apply {
-
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                arguments?.getSerializable("model", CurrencyValue::class.java)
+            } else {
+                arguments?.getSerializable("model") as? CurrencyValue
+            }?.apply {
                 when (selectedTpe) {
                     "From" -> {
                         lifecycleScope.launch {
@@ -91,7 +103,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), View.OnClickListener {
                             "1$ = ${getToCurrencyRate()} ${getToCurrencyCode()}".also {
                                 tv_to_curr_rate.text = it
                             }
-
                         }
                     }
                     "To" -> {

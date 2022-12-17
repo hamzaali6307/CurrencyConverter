@@ -11,8 +11,9 @@ interface CurrencyDao {
     @Query("UPDATE currency SET defaultRate = :rates WHERE currencyCode=:currencyCode")
     fun updateSell(rates: String,currencyCode :String )
 
-    @Delete
-    fun deleteSell(routine: CurrencyValue)
+
+    @Query("SELECT *  FROM currency WHERE currencyCode = :code")
+    fun checkCurrencyAvailable(code: String): CurrencyValue
 
     @Query("Select * from currency")
     fun getSellList(): List<CurrencyValue>
