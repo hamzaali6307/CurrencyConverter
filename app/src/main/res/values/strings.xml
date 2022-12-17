@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">CurrencyConverter</string>
 
-    <string name="convert_currency">Convert Currency</string>
+    <string name="currency">Currency</string>
+    <string name="converter">Converter</string>
     <string name="last_updated">Last updated: 00–00–0000</string>
     <string name="_0">0</string>
     <string name="default_currency">PKR</string>
@@ -9,6 +10,8 @@
     <string name="internet_not_connected">Internet not connected</string>
     <string name="network_failure_error">Some network error</string>
     <string name="loading">Loading…</string>
-    <string name="new_data_available">Rates update after 30 Mint\'s</string>
+    <string name="new_data_available">Rates update after 30 Mint\'s successfully in local storage</string>
     <string name="error_from_response">Single currency Conversion API not available with this App ID, Calculate manually in free version </string>
+    <string name="from">From</string>
+    <string name="to">To</string>
 </resources>

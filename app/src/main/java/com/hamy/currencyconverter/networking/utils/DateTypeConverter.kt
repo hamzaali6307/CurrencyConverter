@@ -10,7 +10,7 @@ class DateTypeConverter {
     }
 
     @TypeConverter
-    fun dStringToDouble(value: String?): Double? {
+    fun stringToDouble(value: String?): Double? {
         return value?.toDouble()
     }
 }

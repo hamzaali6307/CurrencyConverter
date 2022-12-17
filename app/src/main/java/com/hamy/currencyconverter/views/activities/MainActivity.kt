@@ -1,21 +1,32 @@
 package com.hamy.currencyconverter.views.activities
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.work.*
+import android.window.OnBackInvokedDispatcher
+import androidx.activity.addCallback
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.BuildCompat
 import com.hamy.currencyconverter.databinding.ActivityMainBinding
-import com.hamy.currencyconverter.networking.utils.Constants
-import com.hamy.currencyconverter.networking.utils.SchedulerWorker
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.concurrent.TimeUnit
 
-@AndroidEntryPoint
+@BuildCompat.PrereleaseSdkCheck @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    private var mWorkManager: WorkManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(ActivityMainBinding.inflate(layoutInflater).root)
-        mWorkManager = WorkManager.getInstance(this)
+
+        when {
+            BuildCompat.isAtLeastT() -> {
+                onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT) {
+                    finish()
+                }
+            }
+            else -> {
+                onBackPressedDispatcher.addCallback(this /* lifecycle owner */) {
+                    finish()
+                }
+            }
+        }
     }
 }
